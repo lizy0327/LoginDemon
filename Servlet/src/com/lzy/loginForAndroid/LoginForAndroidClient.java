@@ -20,7 +20,6 @@ public class LoginForAndroidClient extends HttpServlet {
 			throws ServletException, IOException {
 		System.out.println("---doGet---");
 		this.doPost(request, response);
-
 	}
 
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -29,33 +28,23 @@ public class LoginForAndroidClient extends HttpServlet {
 		request.setCharacterEncoding("UTF-8");
 
 		String loginName = request.getParameter("LoginName");
-
 		String loginPass = request.getParameter("LoginPass");
-
-		System.out.println(loginName);
-
-		System.out.println(loginPass);
+		System.out.println("userName: "+loginName);
+		System.out.println("pass: "+loginPass);
 
 		response.setCharacterEncoding("UTF-8");
 
 		/**
-		 * 设置相应的文件类型，其实默认的文件类型就是text/html，这里 主要是应用后面的Charset=UTF-8这个参数，防止乱码
+		 * 设置相应的文件类型，其实默认的文件类型就是text/html，
+		 * 这里 主要是应用后面的Charset=UTF-8这个参数，防止乱码
 		 */
-
 		response.setContentType("text/html;charset=UTF-8");
 
 		PrintWriter out = null;
-
 		try {
-			/**
-			 * out是response.getWriter方法返回客户端的值
-			 */
+			//out是response.getWriter方法返回客户端的值
 			out = response.getWriter();
-
-			/**
-			 * 判断登录业务
-			 */
-
+			//判断登录业务
 			if (loginName.equals("lzy") && loginPass.equals("123")) {
 				// 登录成功
 				out.println("success");
@@ -63,15 +52,12 @@ public class LoginForAndroidClient extends HttpServlet {
 			} else {
 				// 登录失败
 				out.println("faild");
+				System.out.println("faild");
 			}
-
 		} finally {
 			if (out != null) {
 				out.close();
 			}
-
 		}
-
 	}
-
 }
