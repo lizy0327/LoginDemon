@@ -17,13 +17,16 @@ import android.os.Handler;
 //import java.util.logging.Handler;
 //import java.util.logging.LogRecord;
 
+import org.apache.http.conn.ConnectTimeoutException;
+import org.apache.http.conn.ConnectionPoolTimeoutException;
+
 import java.lang.ref.WeakReference;
+import java.net.SocketTimeoutException;
 import java.util.WeakHashMap;
 
 import lzy.login.com.loginclient.service.ServiceRuleException;
 import lzy.login.com.loginclient.service.UserService;
 import lzy.login.com.loginclient.service.UserServiceImpl;
-
 
 public class MainActivity extends Activity {
 
@@ -34,13 +37,13 @@ public class MainActivity extends Activity {
 
     //声明业务对象
     private UserService userService = new UserServiceImpl();
-
     private static final int msg_Login_SUCCESS = 1;
-
     private static final String msg_Login_Error = "登录失败";
     private static final String msg_Login_Success = "登录成功";
     public static final String msg_Login_Faild = "用户名或者密码错误";
     public static final String msg_statusCode_Error = "服务器请求出错";
+    public static final String msg_request_TimeOut = "请求服务超时";
+    public static final String msg_response_TimeOut = "服务器响应超时";
     private static ProgressDialog dialog;
 
     //初始化参数的方法
@@ -51,15 +54,12 @@ public class MainActivity extends Activity {
         btnReset = (Button) this.findViewById(R.id.btn_reset);
     }
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         //调用初始化参数
         this.init();
-
-
 
         //点击登录按钮
         this.btnLoging.setOnClickListener(new View.OnClickListener() {
@@ -68,9 +68,6 @@ public class MainActivity extends Activity {
 
             @Override
             public void onClick(View view) {
-
-
-
                 /**
                  * String是引用变量，加上final的意思是这个loginName的引用变量只能用于这个方法的引用变量
                  * 否则的话会在下面副线程里面的try报错
@@ -98,7 +95,6 @@ public class MainActivity extends Activity {
                 dialog.setCancelable(false);
                 dialog.show();
 
-
                 /**
                  * 副线程
                  */
@@ -112,7 +108,23 @@ public class MainActivity extends Activity {
                              */
                             userService.userLogin(loginName, loginPass);
                             handler.sendEmptyMessage(1);
-                        } catch (ServiceRuleException e) {
+                        //服务器响应超时异常
+                        }catch (SocketTimeoutException e) {
+                            e.printStackTrace();
+                            Message msg = new Message();
+                            Bundle date = new Bundle();
+                            date.putSerializable("ErrorMsg", msg_response_TimeOut);
+                            msg.setData(date);
+                            handler.sendMessage(msg);
+                        //客户端连接服务器超时异常
+                        }catch (ConnectTimeoutException e) {
+                            e.printStackTrace();
+                            Message msg = new Message();
+                            Bundle date = new Bundle();
+                            date.putSerializable("ErrorMsg", msg_request_TimeOut);
+                            msg.setData(date);
+                            handler.sendMessage(msg);
+                        }catch (ServiceRuleException e) {
                             e.printStackTrace();
                             Message msg = new Message();
                             Bundle date = new Bundle();
@@ -130,7 +142,6 @@ public class MainActivity extends Activity {
                     }
                 });
                 thread.start();
-
             }
 
         });
@@ -139,11 +150,8 @@ public class MainActivity extends Activity {
         this.btnReset.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
                 txtLogingName.setText("");
                 txtLoginPass.setText("");
-
-
             }
         });
     }
@@ -151,28 +159,22 @@ public class MainActivity extends Activity {
     //调用UI子线程的方法
     private void showTip(String str) {
         Toast.makeText(this, str, Toast.LENGTH_LONG).show();
-
     }
 
     /**
      * 调用Handler方法来实现副线程和主线程之间的数据传递
      */
-
     private static class IHandler extends Handler {
-
         private final WeakReference<Activity> mActivity;
-
         public IHandler(MainActivity activity) {
             mActivity = new WeakReference<Activity>(activity);
         }
 
         @Override
         public void handleMessage(Message msg) {
-
             if (dialog != null) {
                 dialog.dismiss();
             }
-
             int flag = msg.what;
             switch (flag) {
                 case 0:
@@ -184,10 +186,8 @@ public class MainActivity extends Activity {
                     break;
                 default:
                     break;
-
             }
         }
-
     }
 
     /**

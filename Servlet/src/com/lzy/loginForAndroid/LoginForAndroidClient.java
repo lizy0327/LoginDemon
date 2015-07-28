@@ -24,6 +24,14 @@ public class LoginForAndroidClient extends HttpServlet {
 
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
+		/*
+		 * 这一段代码让程序休眠8秒钟，模拟服务器响应超时
+		 * try {
+			Thread.sleep(8000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}*/
 		System.out.println("---doPost---");
 		request.setCharacterEncoding("UTF-8");
 
